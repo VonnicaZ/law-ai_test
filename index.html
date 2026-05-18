@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How I Actually Practice Law with AI in 2026 · Zack Shapiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: { 900: '#0f172a', 800: '#1e293b', 700: '#334155', 600: '#475569', 500: '#64748b', 400: '#94a3b8', 300: '#cbd5e1', 200: '#e2e8f0', 100: '#f1f5f9', 50: '#f8fafc' },
+            accent: { 600: '#2563eb', 500: '#3b82f6', 400: '#60a5fa', 300: '#93c5fd', 100: '#dbeafe', 50: '#eff6ff' },
+            warm: { 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1' }
+          },
+          fontFamily: {
+            serif: ['Noto Serif SC', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    html { scroll-behavior: smooth; }
+
+    .article-body .en {
+      font-family: 'Inter', Georgia, serif;
+      font-size: 1.125rem;
+      line-height: 1.85;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+    .article-body .cn {
+      font-family: 'Noto Serif SC', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: #475569;
+      margin-bottom: 2.5rem;
+      padding-left: 1.5rem;
+      border-left: 3px solid #dbeafe;
+      background: #f8fafc;
+      padding: 1rem 1rem 1rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+    }
+    .article-body .en:first-of-type::first-letter {
+      font-size: 3.5rem;
+      font-weight: 700;
+      float: left;
+      line-height: 1;
+      margin-right: 0.75rem;
+      margin-top: 0.25rem;
+      color: #2563eb;
+    }
+    .article-body h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 3.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .article-body h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .highlight {
+      background: linear-gradient(180deg, transparent 60%, #dbeafe 60%);
+      padding: 0 2px;
+    }
+    .modal-enter { animation: modalIn 0.3s ease-out forwards; }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      z-index: 100;
+      transition: width 0.1s;
+    }
+    @media (max-width: 768px) {
+      .article-body .en { font-size: 1rem; }
+      .article-body .cn { font-size: 0.95rem; }
+      .article-body .en:first-of-type::first-letter { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body class="bg-warm-50 text-ink-800 font-sans min-h-screen">
+
+  <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+
+  <!-- 顶部导航 -->
+  <nav class="bg-white/80 backdrop-blur-md border-b border-ink-200 sticky top-0 z-40">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-accent-600 text-white flex items-center justify-center text-sm font-bold">ZS</div>
+        <span class="font-semibold text-ink-800 text-sm">Zack Shapiro</span>
+      </div>
+      <button onclick="openModal()" class="text-ink-600 hover:text-accent-600 transition flex items-center gap-1.5 text-sm">
+        <i class="fa fa-user-circle"></i> 作者简介
+      </button>
+    </div>
+  </nav>
+
+  <!-- 作者弹窗 -->
+  <div id="authorModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl modal-enter">
+      <div class="relative bg-gradient-to-br from-accent-600 to-accent-500 text-white p-6 rounded-t-2xl">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white text-xl transition">
+          <i class="fa fa-times"></i>
+        </button>
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-2xl font-bold border-2 border-white/30 shrink-0">ZS</div>
+          <div>
+            <h2 class="text-xl font-bold">Zack Shapiro</h2>
+            <p class="text-accent-100 text-sm">Founder, Raines LLP · Yale Law '16</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 space-y-5 text-sm">
+        <div class="flex items-start gap-3">
+          <i class="fa fa-graduation-cap text-accent-500 mt-0.5"></i>
+          <div>
+            <div class="font-semibold text-ink-800">教育背景</div>
+            <div class="text-ink-500">Williams College → Oxford 访问学者 → Yale Law School (J.D. 2016)</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i class="fa fa-briefcase text-accent-500 mt-0.5"></i>
+          <div>
+            <div class="font-semibold text-ink-800">职业经历</div>
+            <div class="text-ink-500">联邦法院书记员 → Davis Polk → BZR 联合创始人 → Raines LLP 创始人</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i class="fa fa-balance-scale text-accent-500 mt-0.5"></i>
+          <div>
+            <div class="font-semibold text-ink-800">执业领域</div>
+            <div class="text-ink-500">初创企业成立、风险投资交易、监管合规（加密、AI、远程医疗）</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i class="fa fa-twitter text-accent-500 mt-0.5"></i>
+          <div>
+            <div class="font-semibold text-ink-800">社交媒体</div>
+            <div class="text-ink-500">X (Twitter) @zackbshapiro · 法律AI领域意见领袖</div>
+          </div>
+        </div>
+        <div class="bg-accent-50 rounded-lg p-4 border border-accent-100">
+          <div class="font-semibold text-accent-700 mb-2 text-xs uppercase tracking-wider">代表作</div>
+          <div class="space-y-2">
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded bg-accent-600 text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+              <div class="text-ink-700">The Claude-Native Law Firm · 788万+浏览</div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded bg-accent-500 text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+              <div class="text-ink-700">The 10X Lawyer</div>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded bg-accent-400 text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+              <div class="text-ink-700">The Judgment Premium</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="max-w-3xl mx-auto px-4 py-10">
+
+    <!-- 头部 -->
+    <header class="mb-12">
+      <div class="flex flex-wrap gap-2 mb-5">
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-accent-50 text-accent-600 border border-accent-100"><i class="fa fa-bolt"></i> 法律AI</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-ink-50 text-ink-600 border border-ink-200"><i class="fa fa-robot"></i> Claude</span>
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-600 border border-purple-100"><i class="fa fa-star"></i> 788万+ 浏览</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-bold text-ink-900 leading-tight mb-4 font-serif">
+        How I Actually Practice Law with AI in 2026
+      </h1>
+      <p class="text-lg text-ink-500 font-serif italic mb-8">我是如何在2026年真正用AI执业的</p>
+
+      <div class="flex items-center justify-between py-4 border-y border-ink-200">
+        <div class="flex items-center gap-3">
+          <button onclick="openModal()" class="w-10 h-10 rounded-full bg-accent-600 text-white flex items-center justify-center text-sm font-bold hover:scale-105 transition cursor-pointer">ZS</button>
+          <div>
+            <div class="font-semibold text-ink-800 text-sm">Zack Shapiro</div>
+            <div class="text-xs text-ink-500">Founder, Raines LLP · Yale Law '16</div>
+          </div>
+        </div>
+        <div class="text-right text-xs text-ink-400">
+          <div>2026年2月27日</div>
+          <div class="flex items-center gap-3 mt-1 justify-end">
+            <span><i class="fa fa-clock-o"></i> 25分钟</span>
+            <span><i class="fa fa-eye"></i> 7.88M</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 正文 -->
+    <article class="article-body">
+
+      <p class="en">A few months ago, the night before a client's acquisition was set to close, the buyer's counsel sent a letter demanding that several key deal terms be restructured. New escrow conditions. Expanded indemnification carve-outs. A revised set of closing deliverables. The implicit threat: accept these changes or we walk. It was 7 PM.</p>
+      <p class="cn">几个月前，在一位客户收购交易即将交割的前夜，买方律师发来一封信函，要求重新调整几项关键交易条款：新的托管条件、扩大的赔偿免责范围、修订后的交割交付物清单。潜台词是：接受这些变更，否则我们就退出。当时是晚上7点。</p>
+
+      <p class="en">I uploaded the purchase agreement, the disclosure schedules, and the demand letter to Claude. Within minutes, Claude mapped every proposed change against the existing deal terms and found what the buyer's lawyers apparently hadn't noticed: two of their proposed carve-outs directly contradicted representations they had already confirmed in the disclosure schedules, and a third would have created an internal conflict with the fundamental reps section that would have actually weakened the buyer's own post-closing protections. Their aggressive last-minute play had holes in it.</p>
+      <p class="cn">我将购买协议、披露附表和这封要求函上传给Claude。几分钟内，Claude就将每一项拟议变更与现有交易条款进行了对照映射，并发现了买方律师显然没有注意到的问题：他们提出的两项免责条款直接与他们已在披露附表中确认过的陈述相矛盾，而第三项则将与基本陈述条款产生内部冲突，实际上会削弱买方自己在交割后的保护。他们这场咄咄逼人的最后一搏漏洞百出。</p>
+
+      <p class="en">As the negotiation continued through the evening with emails going back and forth, I fed each new communication to Claude. It tracked how every proposed concession interacted with provisions across the agreement, flagged where accepting one change would create exposure in another section, and helped me build a response that conceded the points worth conceding and held firm on the ones that mattered. By 11 PM we had a clean set of counter-positions, each grounded in specific cross-references to the buyer's own language. The deal closed the next morning on terms my client was happy with.</p>
+      <p class="cn">随着当晚谈判的继续，邮件往来不断，我将每一封新邮件都喂给Claude。它追踪了每一项拟议让步如何与协议中的其他条款相互作用，标记出接受某一项变更会在另一条款中制造风险的地方，并帮助我构建了一份回应：在该让步的地方让步，在关键问题上坚守立场。到晚上11点，我们已经形成了一套清晰的反制立场，每一条都基于对买方自己措辞的具体交叉引用。第二天早上，交易按客户满意的条款顺利交割。</p>
+
+      <p class="en">A team of three associates at a mid-size firm would have needed until morning to produce that analysis. I had the core of it in under two hours.</p>
+      <p class="cn">一家中型律所的三名律师助理团队需要熬到早上才能完成那份分析。而我用了不到两小时就搞定了核心部分。</p>
+
+      <p class="en">I run a two-person boutique law firm. We handle startup formation, venture capital transactions, and regulatory work. We compete against firms with hundreds and sometimes thousands of lawyers. We are not supposed to be able to do this. But the past year has made something clear: a small firm built around AI doesn't just keep up with larger competitors. It moves faster, produces more thorough work product, and operates at a cost structure that would have been impossible 18 months ago.</p>
+      <p class="cn">我经营着一家只有两人的精品律所。我们处理初创企业成立、风险投资交易和监管事务。我们的竞争对手是拥有数百甚至数千名律师的大型律所。按常理我们根本做不到这些。但过去一年让一件事变得清晰：一家围绕AI构建的小型律所不仅能跟上大型竞争对手的步伐，它行动更快、产出更 thorough 的工作成果，并且以18个月前根本不可能的成本结构运营。</p>
+
+      <p class="en">The tool I've built my practice around is Claude, made by Anthropic. This piece is an explanation of how I actually use it, every day, for real legal work. Not the theory. The workflow.</p>
+      <p class="cn">我围绕其构建执业体系的核心工具是Anthropic出品的Claude。这篇文章解释的是我每一天如何真正用它做实际法律工作。不是理论，而是工作流。</p>
+
+      <h2>Why Claude, Not "Legal AI"</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">为什么选Claude，而非「法律AI」</p>
+
+      <p class="en">The market is full of specialized legal AI products. Harvey, Spellbook, CoCounsel, Luminance. They all share a thesis: lawyers need AI built specifically for legal work. I've evaluated most of them. For a small firm practitioner, a well-configured general-purpose AI is better. It's not close.</p>
+      <p class="cn">市场上充斥着各种专业法律AI产品：Harvey、Spellbook、CoCounsel、Luminance。它们都有一个共同论点：律师需要专门为法律工作打造的AI。我评估过其中大部分。对于小型律所从业者来说，一个配置得当的通用AI要好得多。差距不是一星半点。</p>
+
+      <p class="en">The specialized products are wrappers built on top of the same foundation models that power the general-purpose tools. Their marketing pitch sounds compelling: we'll customize the AI to your firm's playbook, train it on your templates, build workflows around your brief bank or clause library. Some of them do this reasonably well. But the pitch contains a fundamental misunderstanding of where the value actually lives.</p>
+      <p class="cn">这些专业产品本质上是在驱动通用工具的同一个基础模型之上套了个壳。它们的营销话术听起来很诱人：我们会根据贵所的办案手册定制AI，用你们的模板训练它，围绕你们的文书库或条款库构建工作流。其中一些做得还算不错。但这个话术包含了一个根本性的误解：它误解了价值真正存在于何处。</p>
+
+      <p class="en">A template library is not a competitive advantage. Every competent firm in your practice area has roughly the same templates. The NDA, the stock purchase agreement, the employment offer letter. These are commodity inputs. The thing that differentiates a great lawyer from a mediocre one was never the template. It was what the lawyer did with the template: how they spotted the issue the other side buried in Section 14(c), how they knew which indemnification fight was worth having and which to concede, how they structured the advice email so the client actually understood the risk. That is judgment. And judgment doesn't live at the firm level. It lives at the level of the individual professional.</p>
+      <p class="cn">模板库不是竞争优势。你执业领域中每家像样的律所都有大致相同的模板：保密协议、股票购买协议、聘用要约函。这些都是商品化的输入素材。区分优秀律师与普通律师的从来不是模板，而是律师对模板的运用：如何发现对方埋在14(c)条款中的陷阱，如何知道哪场赔偿条款之争值得打、哪场该让步，如何构建建议邮件的结构让客户真正理解风险。这就是判断力。而判断力不存在于律所层面，它存在于个体专业人士层面。</p>
+
+      <p class="en">When legal AI companies talk about customizing AI to a firm's playbook, they are solving a problem that barely matters and ignoring the one that does. The real leverage comes not from which template the AI starts with, but from the <span class="highlight">instructions</span> that tell it how to think about the work: what to look for, what to flag, how to weigh competing considerations, what format to deliver the output in, what tone to use with the client. Those instructions encode an individual lawyer's judgment, not a firm's template library. And that is exactly what Claude's skill system is built to do.</p>
+      <p class="cn">当法律AI公司谈论根据律所办案手册定制AI时，它们解决的是一个几乎无关紧要的问题，而忽略了真正重要的那个。真正的杠杆不在于AI从哪个模板开始，而在于<span class="highlight">指令</span>——那些告诉它如何思考工作的指令：该寻找什么、该标记什么、如何权衡相互冲突的考量、以什么格式交付输出、对客户使用什么语气。这些指令编码的是个体律师的判断力，而非律所的模板库。而这正是Claude的Skill系统被设计来做的事。</p>
+
+      <p class="en">I've created custom instruction files, called "skills," that encode my analytical frameworks, my preferred formats, my voice, and my judgment about how specific types of legal work should be done. When I upload a contract for review, Claude doesn't apply a generic framework. It doesn't even apply my firm's framework. It applies <em>my</em> framework, the one I've developed over a decade of practice, automatically. The difference between a firm playbook and an individual lawyer's encoded judgment is the difference between giving someone a recipe and teaching them how to cook.</p>
+      <p class="cn">我创建了自定义指令文件，称为「Skills」，它们编码了我的分析框架、我偏好的格式、我的语气，以及我对特定类型法律工作该如何完成的判断。当我上传一份合同要求审查时，Claude不会套用通用框架，甚至不会套用我律所的框架。它自动应用的是<em>我的</em>框架——我历经十年执业发展出来的那个。律所办案手册与个体律师编码化判断力之间的差距，就像给某人一份食谱与教他会做饭之间的差距。</p>
+
+      <p class="en">There's a more fundamental issue, and it's the one that will matter most to anyone who has spent their career inside Microsoft Word. Claude is a frontier AI model that has been heavily optimized for writing code. That may sound irrelevant to legal practice until you realize what it means: Claude can write code, on the fly, to directly manipulate the applications lawyers already use.</p>
+      <p class="cn">还有一个更根本的问题，对于那些职业生涯都在Microsoft Word中度过的人来说，这个问题最为关键。Claude是一个前沿AI模型，被深度优化用于编写代码。这听起来似乎与法律执业无关，直到你意识到这意味着什么：Claude可以实时编写代码，直接操作律师已经在使用的应用程序。</p>
+
+      <p class="en">Think about what this means concretely. Every lawyer reading this has lost hours to Word formatting. Paragraph numbering that breaks when you paste from another document. Styles that refuse to cooperate. Track changes that corrupt across versions. Cross-references that go stale. Bluebook citation formatting that requires manual attention on every single period and comma. These are not legal problems. They are software problems. And Claude solves software problems by writing software. When I tell Claude to apply tracked changes to a contract, it doesn't use a plugin or a macro. It opens the .docx file at the XML level and writes the exact markup that Microsoft Word expects, attributed to my name, preserving every formatting detail. When I tell it to standardize the citation格式 in a brief, it writes code to parse and reformat every citation in seconds. The result is indistinguishable from expert manual work, delivered in a fraction of the time.</p>
+      <p class="cn">想想这在实践中意味着什么。每一位读到此处的律师都曾在Word格式排版上浪费过数小时：从另一个文档粘贴时断裂的段落编号、拒不配合的样式、跨版本损坏的修订追踪、失效的交叉引用、需要手动逐个调整标点和逗号的Bluebook引注格式。这些不是法律问题，而是软件问题。而Claude通过编写软件来解决软件问题。当我让Claude对合同应用修订追踪时，它不使用插件或宏。它直接在XML层级打开.docx文件，写入Microsoft Word期望的确切标记，署上我的名字，保留每一个格式细节。当我让它标准化文书中的引注格式时，它编写代码在数秒内解析并重新格式化每一条引注。结果与专家手工操作无法区分，而时间只是零头。</p>
+
+      <p class="en">This is the capability gap that no specialized legal AI product can match. They give you a chatbot that talks about documents. Claude is a system that can reach inside those documents and change them. It is the difference between an associate who can tell you what's wrong with a contract and an associate who can also fix it, format it, produce the redline, and draft the cover email, all without you opening a single application. General-purpose AI advances faster than any vertical product can keep up with. When you're on the frontier model, every new capability ships to you on day one. When you're on a wrapper, you're waiting for someone else's engineering team to decide what to build next.</p>
+      <p class="cn">这是任何专业法律AI产品都无法匹敌的能力鸿沟。它们给你的是一个能谈论文档的聊天机器人。Claude则是一个能深入文档内部并修改它们的系统。这就像助理律师A能告诉你合同哪里有问题，而助理律师B不仅能指出问题，还能修复它、排版它、生成红线版本、起草附函——全程无需你打开任何一个应用程序。通用AI的进化速度是任何垂直产品都追不上的。当你使用前沿模型时，每一项新能力都在发布首日送达你手中。而当你使用套壳产品时，你在等待别人的工程团队决定下一步该造什么。</p>
+
+      <p class="en">I'm describing my own practice here, which is transactional. But nothing about the architecture is practice-specific. A litigator would build skills for deposition preparation, motion drafting, case law synthesis, and discovery review. A tax lawyer would build skills for entity structuring, opinion letter frameworks, and regulatory monitoring. A family lawyer would build skills for asset tracing and custody analysis. The approach is the same: take a powerful general model, teach it your practice, and let it compound your judgment. The content is yours.</p>
+      <p class="cn">我在这里描述的是我自己的交易型执业。但这个架构本身并不限于特定执业领域。诉讼律师可以构建用于 deposition 准备、动议起草、判例法综合和证据开示审查的Skills。税务律师可以构建用于实体架构、意见书框架和监管监控的Skills。家事律师可以构建用于资产追踪和抚养权分析的Skills。方法是一样的：拿一个强大的通用模型，教它你的执业领域，让它放大你的判断力。内容是你的。</p>
+
+      <h2>Three Modes</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">三种模式</p>
+
+      <p class="en">Claude's desktop app has three modes. Learning when to use each one was the single most important step in making this work.</p>
+      <p class="cn">Claude桌面应用有三种模式。学会在何时使用哪一种，是让这套体系运转起来最重要的一步。</p>
+
+      <p class="en"><strong>Chat</strong> is the conversational interface. I talk to Claude the way I'd talk to a fast, knowledgeable associate sitting across the table. This is where I go for analyzing a legal issue, brainstorming negotiation strategy, getting a first take on a contract provision, or drafting something from scratch. I stay in control of every step. Most lawyers who have used ChatGPT or similar tools have only experienced this mode.</p>
+      <p class="cn"><strong>Chat（对话）</strong>是对话界面。我和Claude交谈的方式，就像和坐在对面、反应迅速、知识渊博的助理交谈一样。这是我用来分析法律问题、头脑风暴谈判策略、对合同条款做初步判断、或从零起草文件的地方。每一步我都保持控制。大多数用过ChatGPT或类似工具的律师，只体验过这一种模式。</p>
+
+      <p class="en"><strong>Cowork</strong> is the autonomous mode, and it's the one that changes everything. I point Claude at a folder on my computer, give it a task, and it goes and does it. It reads files, creates new ones, edits existing documents, and makes its own decisions about how to get from A to B. When I have a 40-page agreement that needs a full redline, or a stack of closing documents that need to be generated from a term sheet, I hand it to Cowork and let it work. This is the mode most lawyers haven't tried. It's the one that will change their practice the most.</p>
+      <p class="cn"><strong>Cowork（协作）</strong>是自主模式，也是改变一切的那种模式。我指向电脑上的一个文件夹，给它一个任务，它就去执行了。它读取文件、创建新文件、编辑现有文档，并自主决定如何从A走到B。当我有一份40页的协议需要完整红线版本，或有一堆交割文件需要根据条款清单生成时，我交给Cowork让它去干。这是大多数律师还没尝试过的模式。也是最能改变他们执业的那种模式。</p>
+
+      <p class="en"><strong>Code</strong> is the development mode. Full terminal access. Most lawyers don't need it daily. But I have a condition that makes it hard to read long documents, so I used Code to build a command-line tool that converts legal documents into spoken audio. It handles the entire pipeline: parsing Word docs and PDFs, converting legal formatting like "Section 4.2(b)(iii)" into natural speech, expanding abbreviations, chunking the text, sending it to an AI voice API, and assembling the final audio file. I listen to contracts on my commute now. Claude built the whole thing.</p>
+      <p class="cn"><strong>Code（代码）</strong>是开发模式。完整的终端访问权限。大多数律师不需要每天用它。但我有一种导致阅读长文档困难的状况，所以我用Code模式构建了一个命令行工具，将法律文档转换为语音音频。它处理整个流程：解析Word和PDF文档、将"Section 4.2(b)(iii)"这类法律格式转换为自然语音、展开缩写、分块文本、发送至AI语音API、组装最终音频文件。现在我通勤时听合同。整个工具都是Claude写的。</p>
+
+      <h2>Teaching Claude Your Practice</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">教会Claude你的执业领域</p>
+
+      <p class="en">This is where the leverage becomes something I wouldn't have believed two years ago.</p>
+      <p class="cn">到了这一步，杠杆效应达到了两年前的我无法相信的程度。</p>
+
+      <p class="en">Anthropic published a guide on building custom "skills" for Claude: structured instruction files that teach it how to behave in a specific context. Not a prompt you type every time. A persistent set of instructions that fires automatically when the situation calls for it. Instead of reading the guide cover to cover, I uploaded it to Claude and asked a better question: based on the hundreds of conversations we've had together, spanning contract drafting, client emails, document editing, legal research, and policy writing, what are the skills that would have the greatest impact on my practice?</p>
+      <p class="cn">Anthropic发布了一份关于为Claude构建自定义「Skills」的指南：结构化指令文件，教它在特定情境下如何表现。不是每次都要输入的提示词，而是一套持久化的指令，在情境需要时自动触发。我没有从头到尾读那份指南，而是把它上传给Claude，问了一个更好的问题：基于我们之间数百次对话——涵盖合同起草、客户邮件、文档编辑、法律研究和政策撰写——哪些Skills会对我的执业产生最大影响？</p>
+
+      <p class="en">Claude analyzed months of our work and identified the patterns: which tasks I repeated most, where the friction was highest, where structured automation could save the most time. The skills it recommended weren't generic. They were specific to how I actually work. Not "draft contracts faster" but "a contract review skill with four distinct modes depending on context, severity ratings, a missing-provisions checklist, market-term benchmarking, and a seamless handoff to a tracked-changes editing skill when you're ready to mark up the document."</p>
+      <p class="cn">Claude分析了我们数月的工作，识别出规律：哪些任务我重复最多、哪里摩擦最大、哪里结构化自动化能节省最多时间。它推荐的Skills不是通用的，而是专门针对我实际工作方式的。不是「更快地起草合同」，而是「一个合同审查Skill，具备四种根据情境区分的模式、严重程度评级、缺失条款检查清单、市场条款基准对照，并在你准备标注文档时无缝交接给修订追踪编辑Skill」。</p>
+
+      <p class="en">We refined the details over a couple hours. I pushed back where the defaults didn't match my preferences. By the end I had six production-ready skills bundled into a single plugin for the Cowork desktop app: contract review, tracked changes editing, contract drafting, client communications, legal research, and policy writing. Each one encodes years of accumulated professional judgment about how I approach that type of work.</p>
+      <p class="cn">我们花了几个小时完善细节。在默认设置不符合我偏好时我提出反对。最终，我得到了六个可投入生产的Skills，打包成一个Cowork桌面应用的插件：合同审查、修订追踪编辑、合同起草、客户沟通、法律研究和政策撰写。每一个都编码了我多年积累的专业判断力，关于我如何处理这类工作。</p>
+
+      <p class="en">The implication that matters for firm management: the plugin is transferable. If I had 50 associates, I could install it on every machine. Every associate would immediately produce contract reviews using my analytical framework, draft communications in my voice, and apply tracked changes in my preferred format. Knowledge that takes years of mentorship to transmit is now an instruction file that works from the first draft. The output still requires attorney review, but the review starts from a much higher baseline.</p>
+      <p class="cn">这对律所管理的重要启示是：这个插件是可转移的。如果我有50名助理，我可以把它安装在每一台机器上。每位助理都会立即使用我的分析框架产出合同审查意见、用我的语气起草沟通邮件、以我偏好的格式应用修订追踪。原本需要数年师徒传承才能传递的知识，现在变成了一份从第一稿就能生效的指令文件。输出仍然需要律师审查，但审查的起点已经高得多。</p>
+
+      <h2>What This Looks Like in Practice</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">这在实践中是什么样子</p>
+
+      <p class="en">Three examples from real work, because I want this to be concrete.</p>
+      <p class="cn">三个真实工作中的例子，因为我想让这一切变得具体可感。</p>
+
+      <h3>Tracked changes without opening Word</h3>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">不打开Word的修订追踪</p>
+
+      <p class="en">A counterparty sends back a redlined agreement. Forty pages of changes across representations, indemnification, IP, and closing conditions. I upload the document to Claude and say: "Help me evaluate the counterparty's changes from my client's perspective." My contract review skill fires. Claude organizes every change by severity, flags where the counterparty shifted risk, identifies tensions between modified provisions, checks for standard provisions that should be present but aren't, and produces a summary with specific counter-language for each issue.</p>
+      <p class="cn">对方发回一份红线标注的协议。40页的修改遍布陈述与保证、赔偿条款、知识产权和交割条件。我将文档上传给Claude，说：「从客户的角度帮我评估对方的修改。」我的合同审查Skill自动触发。Claude按严重程度组织每一项修改、标记对方转移风险的地方、识别修改后条款之间的张力、检查应存在却缺失的标准条款，并产出一份摘要，针对每个问题给出具体的反制措辞。</p>
+
+      <p class="en">Then I apply my judgment. Claude flagged a pattern in the markup. I know from experience what that pattern usually signals. Claude generated three alternative formulations for a disputed clause. I pick the one that accounts for relationship dynamics and deal context that no AI has access to. Once I've made my decisions, I tell Claude to apply the edits. This is the part that drops jaws the first time you see it. Claude opens the Word document at the XML level, applies tracked changes attributed to my name, preserves every formatting detail, and produces a clean .docx with real tracked changes that opposing counsel can open in Microsoft Word and review normally. I don't open Word. I don't open Litera. Claude produces the redline. I review every change, and I send it. Then the client communications skill drafts the cover email in the right tone. Total time from receiving the markup to having a response package ready to send: under an hour, of which about 30 minutes is my own thinking.</p>
+      <p class="cn">然后我运用我的判断力。Claude在标注中发现了一个模式。凭经验我知道这个模式通常意味着什么。Claude为争议条款生成了三种替代表述。我选了那个考虑到关系动态和交易情境的方案——这些是AI无法获取的信息。一旦我做出决定，我指示Claude应用编辑。这是第一次见时让人下巴掉下来的环节。Claude在XML层级打开Word文档，应用署名为我的修订追踪，保留每一个格式细节，生成一份干净的.docx文件，带有真正的修订追踪，对方律师可以在Microsoft Word中正常打开和审阅。我不打开Word，我不打开Litera。Claude生成红线版本。我审查每一项修改，然后发送。接着客户沟通Skill以恰当的语气起草附函。从收到标注到准备好发送回应包的总时间：不到一小时，其中大约30分钟是我自己的思考时间。</p>
+
+      <h3>Research without hallucinations</h3>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">零幻觉的法律研究</p>
+
+      <p class="en">A client needs to understand the regulatory landscape for a new product. The question spans multiple agencies and overlapping statutory frameworks. My research skill instructs Claude to launch parallel research across every relevant angle simultaneously rather than working through them sequentially: the securities analysis, the state licensing requirements, the banking regulations, the consumer protection implications. It runs multiple searches per sub-topic, cross-references sources, and prioritizes primary authority (statutes, regulations, agency guidance, case law) over secondary commentary.</p>
+      <p class="cn">一位客户需要了解一款新产品的监管格局。问题跨越多个监管机构和重叠的法律框架。我的研究Skill指示Claude同时从每一个相关角度启动并行研究，而非依次处理：证券分析、州许可要求、银行法规、消费者保护影响。它针对每个子主题运行多次检索、交叉引用来源，并优先采用一级权威（成文法、法规、机构指引、判例法）而非二级评论。</p>
+
+      <p class="en">Before delivering anything to me, the skill requires Claude to run a self-review. This is critical, and it's the part most people skip. Claude must verify that every cited authority actually says what the memo claims. It must flag anything where its confidence is below high. It must check for internal contradictions across sections. And it must specifically guard against hallucinated citations, the problem that got several lawyers sanctioned and made national news. The lawyers who submitted fake AI-generated citations were using tools without this kind of verification layer. The problem was never AI itself. It was AI without quality control.</p>
+      <p class="cn">在向我交付任何内容之前，这个Skill要求Claude运行自我审查。这至关重要，也是大多数人跳过的环节。Claude必须验证每一条被引用的权威来源确实说了备忘录所声称的内容。它必须标记任何信心度低于「高」的内容。它必须检查各章节之间的内部矛盾。它还必须特别防范幻觉引注——这个问题曾导致多名律师被制裁并登上全国新闻。那些提交伪造AI生成引注的律师，使用的是没有这种验证层的工具。问题从来不是AI本身，而是没有质量控制的AI。</p>
+
+      <p class="en">The output is a structured research memo, with a bottom-line-up-front summary, specific statutory citations, and practical recommendations, that would take a junior associate days to produce. Claude delivers a first draft in under an hour. I then review every citation, stress-test the analysis, and revise where my judgment diverges from the output. The total time is still a fraction of what it would take starting from scratch. And because the skill is calibrated to my standards (confident conclusions with explicit uncertainty flags, tables for comparing regulatory frameworks, practical recommendations rather than academic hedging), the memo is useful immediately.</p>
+      <p class="cn">产出是一份结构化的研究备忘录，包含开门见山的摘要、具体的成文法引注和实务建议——这原本需要初级律师助理数天才能完成。Claude在一小时内交付初稿。然后我审查每一条引注、对分析进行压力测试、在我的判断力与输出有分歧的地方进行修订。总时间仍然只是从零开始所需时间的一小部分。而且由于这个Skill是按我的标准校准的（自信的结论附带明确的不确定性标记、用于比较监管框架的表格、实务建议而非学术式回避），这份备忘录立即可用。</p>
+
+      <h3>Real-time contract interpretation</h3>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">实时合同解读</p>
+
+      <p class="en">A client called mid-morning to say they had just received a demand letter from a counterparty claiming breach of a commercial services agreement and threatening termination. The client had 48 hours to respond. I uploaded the agreement, the demand letter, and the client's last three months of correspondence with the counterparty. Claude mapped every factual allegation in the demand letter against the specific contract provisions cited, and found that two of the four claimed breaches referenced obligations that had been expressly modified by a side letter the counterparty's own counsel had drafted. The demand letter appeared to have been written without checking their own amendments. As I prepared the response, I ran each draft paragraph through Claude to pressure-test whether any of my arguments had unintended implications for other provisions in the agreement. It caught one: a defense I was planning to raise on the service-level metrics could have been read to concede a point on the payment dispute in Section 7. I rewrote the response. That kind of real-time, provision-by-provision stress-testing while actively drafting is something that used to require a second lawyer reviewing your work. Now it happens in the same conversation where the work gets done.</p>
+      <p class="cn">一位客户在上午中段来电，说他们刚收到对方的一封要求函，声称违反商业服务协议并威胁终止合同。客户有48小时回应时间。我上传了协议、要求函以及客户过去三个月与对方的往来通信。Claude将要求函中的每一项事实指控与引用的具体合同条款进行映射，发现四项所谓违约中有两项引用的义务已被对方自己律师起草的附属函件明确修改过。这封要求函看起来是在没有核查他们自己修订的情况下写就的。在我准备回应时，我将每一段草稿都交给Claude进行压力测试，检查我的任何论点是否会对协议中的其他条款产生意外影响。它发现了一个：我打算就服务水平指标提出的抗辩，可能被解读为对第7条付款争议的让步。我重写了回应。这种在积极起草过程中实时、逐条进行的压力测试，过去需要第二位律师审查你的工作才能实现。现在它在完成工作的同一次对话中就发生了。</p>
+
+      <h2>The Privilege Question</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">保密特权问题</p>
+
+      <p class="en">Every lawyer asks. The short answer: the same framework that lets you use cloud storage, e-discovery platforms, and online legal research databases applies here. ABA guidance and state bar ethics opinions treat AI tools as third-party technology providers covered by the agent/instrumentality exception. Your obligations are to make reasonable efforts to protect client data, which in practice means turning off model training on your inputs, understanding the provider's data handling practices, and documenting your reasoning. Anthropic offers a zero-data-retention API option and business data processing agreements, so that none of your client data is used to train models, and inputs are not stored beyond the session. The same diligence you performed before putting client documents in Dropbox, Google Drive, or Clio.</p>
+      <p class="cn">每个律师都会问。简短回答：允许你使用云存储、电子证据开示平台和在线法律研究数据库的同一框架在这里同样适用。美国律师协会指引和各州律师协会伦理意见将AI工具视为受代理人/工具例外覆盖的第三方技术提供商。你的义务是做出合理努力保护客户数据，在实践中这意味着关闭对你输入内容的模型训练、了解提供商的数据处理实践、并记录你的 reasoning。Anthropic提供零数据保留API选项和商业数据处理协议，确保你的客户数据不会被用于训练模型，输入内容也不会在会话结束后保留。这与你在把客户文档放入Dropbox、Google Drive或Clio之前所做的尽职调查是一样的。</p>
+
+      <p class="en">I went a step further. I had Claude help me draft an AI usage provision for my engagement letters. The provision frames AI as an efficiency and quality enhancer, emphasizes attorney supervision, ties data handling to existing confidentiality obligations, and secures client consent. Clients sign it without blinking. Most of them assume I'm already using AI. They're right.</p>
+      <p class="cn">我走得更进一步。我让Claude帮我起草了一份用于聘用函的AI使用条款。该条款将AI定位为效率与质量的增强工具，强调律师监督，将数据处理与现有保密义务挂钩，并取得客户同意。客户们毫不犹豫地签字。他们中的大多数人已经假设我在使用AI。他们是对的。</p>
+
+      <p class="en">The ethics rules now require technology competence in most jurisdictions. We are approaching the point where not using these tools is the harder professional responsibility position to defend.</p>
+      <p class="cn">如今大多数司法管辖区的伦理规则都要求具备技术胜任能力。我们正接近这样一个临界点：不使用这些工具反而成为更难辩护的职业责任立场。</p>
+
+      <h2>The Prompt Is the Skill</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">提示词即Skill</p>
+
+      <p class="en">Most lawyers who try AI write something like "review this contract" and get back something mediocre. Then they decide AI isn't useful for legal work.</p>
+      <p class="cn">大多数尝试AI的律师会写类似「审查这份合同」这样的话，然后得到一些平庸的结果。于是他们断定AI对法律工作没用。</p>
+
+      <p class="en">The problem is not the AI. The problem is the input.</p>
+      <p class="cn">问题不在AI。问题在输入。</p>
+
+      <p class="en">Compare "review this contract" with "review this services agreement from the vendor's perspective. Flag provisions where the customer shifted risk beyond market norms for this type of deal. Check for missing provisions that should be present, including limitation of liability, IP ownership, data handling, and termination for convenience. Produce a severity-rated summary with specific counter-language for each high-severity issue. Note that the vendor has limited negotiating leverage and wants to close the deal, so recommendations should focus on provisions worth fighting for versus provisions to concede gracefully."</p>
+      <p class="cn">比较「审查这份合同」和「从供应商的角度审查这份服务协议。标记客户将风险转移至此类交易的市场规范之外的地方。检查应存在却缺失的条款，包括责任限制、知识产权归属、数据处理和任意终止权。产出一份按严重程度评级的摘要，针对每一项高严重度问题给出具体的反制措辞。请注意供应商谈判筹码有限且希望达成交易，因此建议应聚焦于值得争取的条款与可以优雅让步的条款之间的取舍。」</p>
+
+      <p class="en">The second version produces work product that is useful on the first pass. The first produces work product that requires extensive revision, if it's useful at all. The entire gap between "AI is a toy" and "AI changed my practice" lives in the quality of your instructions. This is why skills matter: they encode that level of detail so you write it once and it fires every time.</p>
+      <p class="cn">第二个版本在第一次就能产出可用的工作成果。第一个版本产出的工作成果需要大量修订——如果它还有用的话。「AI是个玩具」与「AI改变了我的执业」之间的全部鸿沟，就在于你的指令质量。这就是Skills重要的原因：它们将那种细节程度编码进去，让你写一次，每次都能自动触发。</p>
+
+      <h2>What This Changes</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">这改变了什么</p>
+
+      <p class="en">A few things follow from all of this that are worth naming.</p>
+      <p class="cn">这一切带来了一些值得明确指出的变化。</p>
+
+      <p class="en"><strong>Staffing.</strong> I run a two-person firm that handles the workload of a much larger practice. That is a direct function of AI. The work that traditionally justified an associate hire, first-pass document review, research memos, initial drafts, redline summaries, routine correspondence, is now handled by Claude under my supervision. To be clear: every document that leaves my firm has been reviewed, revised, and approved by a licensed attorney. AI produces the first pass. I produce the final work product. Associates are not obsolete. But the bar for when hiring one makes economic sense has moved. And what you need them to do has changed: judgment, client relationships, and AI output supervision, not 2,000 hours of document production.</p>
+      <p class="cn"><strong>人员配置。</strong>我经营着一家两人律所，却承担着规模远大于我们的执业工作量。这是AI的直接作用。传统上需要雇佣助理律师的工作——初稿文件审查、研究备忘录、初稿起草、红线摘要、日常通信——现在都在我的监督下由Claude处理。明确一点：离开我们律所的每一份文件都经过持证律师的审查、修订和批准。AI产出初稿。我产出最终工作成果。助理律师并未过时。但雇佣他们的经济合理性门槛已经改变。而且你需要他们做的事也变了：判断力、客户关系、AI输出监督，而不是2000小时的文档生产。</p>
+
+      <p class="en"><strong>Billing.</strong> AI changes the value equation. For some tasks, the time savings are obvious and I pass them on to clients. For others, the same hours produce dramatically deeper analysis, more comprehensive issue-spotting, and higher-quality drafting than would have been possible before. The point is not that every task takes less time. It is that every hour of attorney time produces more value. My firm offers subscription pricing alongside traditional hourly billing, depending on the engagement. The subscription clients get ongoing advisory, contract review, compliance monitoring, and routine governance for a flat monthly fee. No meter running. AI makes this model work, because I can deliver more comprehensive service within a predictable fee structure. Clients love it: they're not afraid to pick up the phone or send an email. And the revenue is predictable instead of lumpy.</p>
+      <p class="cn"><strong>计费模式。</strong>AI改变了价值等式。对于某些任务，节省的时间显而易见，我会将这部分让利给客户。对于另一些任务，同样的时间能产出远比以前更深入的分析、更全面的问题识别和更高质量的起草。关键不在于每项任务耗时更少，而在于每一小时的律师时间能产出更多价值。我的律所根据委托事项提供订阅定价与传统计时收费并行的模式。订阅客户每月支付固定费用，获得持续顾问服务、合同审查、合规监控和日常治理。没有计时器在跑。AI让这个模式成为可能，因为我可以在可预测的费用结构内提供更全面的服务。客户喜欢这样：他们不怕打电话或发邮件。而且收入是可预测的，而非忽高忽低。</p>
+
+      <p class="en"><strong>Judgment.</strong> Everything I've described creates a temptation to let the AI do too much. To stop checking. The research on this is consistent: people who use AI outside its competence, or who trust it without interrogating the output, perform worse than people who don't use AI at all. The lawyers who will win with this technology understand at a foundational level that the AI is not practicing law. You are practicing law. The AI makes you faster, more thorough, and more consistent. But the judgment, the part where you decide what to fight for and what to concede, where you read between the lines, where you make a call that could go either way and stake your reputation on it, that is yours. Experienced lawyers have an enormous advantage in this new world, and most of them don't realize it. If you've spent 10 or 20 years developing judgment in your practice area, you are sitting on exactly the asset that AI makes more valuable, not less.</p>
+      <p class="cn"><strong>判断力。</strong>我所描述的一切都会制造一种诱惑：让AI做得太多，停止核查。关于这一点的研究结论一致：在AI能力范围之外使用它、或不经审视就信任其输出的人，表现比完全不使用AI的人更差。能在这种技术中胜出的律师，从根本上理解AI不是在执业。是你在执业。AI让你更快、更 thorough、更一致。但判断力——你决定争取什么、让步什么的部分，你在字里行间读出的信息，你做出一个可能左右皆可的抉择并押上你声誉的部分——那是你的。经验丰富的律师在这个新世界拥有巨大优势，而他们中的大多数人尚未意识到这一点。如果你花了10年或20年在你的执业领域培养判断力，你正坐拥的恰恰是AI使其变得更有价值、而非更廉价的资产。</p>
+
+      <h2>Go Build</h2>
+      <p class="cn" style="border:none;background:none;padding:0;color:#64748b;font-style:italic;margin-bottom:2rem;">去构建吧</p>
+
+      <p class="en">I don't work for Anthropic. I'm a practicing lawyer who tried every AI tool available and built my practice around the one that worked best for how I actually work.</p>
+      <p class="cn">我不为Anthropic工作。我是一名执业律师，尝试了所有可用的AI工具，并围绕最适合我实际工作方式的那个构建了我的执业体系。</p>
+
+      <p class="en">The gap between how most lawyers use AI (typing a question into a chatbot and hoping for the best) and what I've described here is enormous. Closing that gap doesn't require technical skill. It requires investing a few hours in learning how the tool actually works: the difference between Chat and Cowork, why long detailed prompts produce dramatically better results than short ones, how to build a skill that encodes your judgment, how to bundle skills into a plugin that any colleague can use.</p>
+      <p class="cn">大多数律师使用AI的方式（在聊天机器人里输入一个问题然后祈祷好运）与我这里描述的方式之间的差距是巨大的。弥合这个差距不需要技术技能。它只需要投入几个小时学习这个工具实际如何运作：Chat与Cowork的区别、为什么详细的长提示词比短提示词产生好得多的结果、如何构建一个编码你判断力的Skill、如何将Skills打包成任何同事都能使用的插件。</p>
+
+      <p class="en">Download the desktop app. Pick the task you do most often. Write a prompt that describes, in detail, exactly how you want it done. See what comes back. Then build your first skill. The returns compound fast.</p>
+      <p class="cn">下载桌面应用。挑选你最常做的任务。写一段提示词，详细描述你确切希望它如何完成。看看返回什么结果。然后构建你的第一个Skill。回报会以复利速度增长。</p>
+
+    </article>
+
+    <!-- 底部 -->
+    <div class="mt-16 pt-8 border-t border-ink-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <button onclick="openModal()" class="w-10 h-10 rounded-full bg-accent-600 text-white flex items-center justify-center text-sm font-bold hover:scale-105 transition cursor-pointer">ZS</button>
+          <div>
+            <div class="font-semibold text-ink-800 text-sm">Zack Shapiro</div>
+            <div class="text-xs text-ink-500">Founder, Raines LLP · Yale Law '16</div>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <a href="https://x.com/zackbshapiro" target="_blank" class="w-9 h-9 rounded-lg bg-ink-100 text-ink-600 flex items-center justify-center hover:bg-accent-600 hover:text-white transition">
+            <i class="fa fa-twitter"></i>
+          </a>
+          <a href="https://rains.law" target="_blank" class="w-9 h-9 rounded-lg bg-ink-100 text-ink-600 flex items-center justify-center hover:bg-accent-600 hover:text-white transition">
+            <i class="fa fa-globe"></i>
+          </a>
+        </div>
+      </div>
+      <p class="text-center text-xs text-ink-400 mt-8">原文发表于 X (Twitter) · 2026年2月27日 · 788万+浏览 · 仅供学习交流</p>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('authorModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('authorModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('authorModal').addEventListener('click', function(e){
+      if(e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') closeModal();
+    });
+    window.addEventListener('scroll', function() {
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = (scrollTop / scrollHeight) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    });
+  </script>
+</body>
+</html>
